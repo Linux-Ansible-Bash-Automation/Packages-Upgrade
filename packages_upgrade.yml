@@ -1,0 +1,94 @@
+---
+- name: Upgrade multiple packages on RPM and DEB destros
+  hosts: '*'
+  become: true
+  become_method: sudo
+  become_user: root
+
+  vars:
+    upgrade_packages:
+      - curl
+      - open-vm-tools
+      
+  tasks:
+# ------------------Ubuntu Section-----------------------------------------------------------------
+    - name: Ubuntu section
+      block:
+        - name: Update apt cache (Ubuntu)
+          ansible.builtin.apt:
+            update_cache: yes
+          ignore_errors: true
+
+        - name: Show versions before upgrade (Ubuntu)
+          command: apt-cache policy {{ upgrade_packages | join(' ') }}
+          register: ubuntu_versions
+
+        - name: Display Ubuntu versions before upgrade (Ubuntu)
+          debug:
+            msg: "{{ ubuntu_versions.stdout_lines }}"
+
+        - name: Upgrade packages (Ubuntu)
+          apt:
+            name: "{{ upgrade_packages }}"
+            state: latest 
+            only_upgrade: yes
+          ignore_errors: true
+
+        - name: Show versions after upgrade (Ubuntu)
+          command: apt-cache policy {{ upgrade_packages | join(' ') }} 
+          register: ubuntu_versions_after 
+        
+        - name: Display versions after upgrade (Ubuntu)
+          debug:
+            msg: "{{ ubuntu_versions_after.stdout_lines }}"
+
+      when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+
+# ----------------RedHat Section---------------------------------------------
+    - name: RedHat Section
+      block:
+        - name: Update yum cache (RedHat)
+          yum: 
+            update_cache: yes
+          ignore_errors: true
+          when: ansible_pkg_mgr == "yum"
+
+        - name: Update dnf cache (RedHat)
+          dnf:
+            update_cache: yes
+          ignore_errors: true
+          when: ansible_pkg_mgr == "dnf"
+
+        - name: Show versions before upgrade (RedHat)
+          command: rpm -q {{ upgrade_packages | join(' ') }}
+          register: rhel_versions
+
+        - name: Display RHEL versions before upgrade (RedHat)
+          debug:
+            msg: "{{ rhel_versions.stdout_lines }}"
+
+        - name: Upgrade packages (yum)
+          yum:
+            name: "{{ upgrade_packages }}"
+            state: latest 
+            only_upgrade: yes
+          ignore_errors: true          
+          when: ansible_pkg_mgr == "yum"
+
+        - name: Upgrade packages (dnf)
+          dnf:
+            name: "{{ upgrade_packages }}"
+            state: latest 
+            update_only: yes
+          ignore_errors: true
+          when: ansible_pkg_mgr == "dnf"
+
+        - name: Show versions after upgrade (RedHat)
+          command: rpm -q {{ upgrade_packages | join(' ') }} 
+          register: rhel_versions_after 
+        
+        - name: Display versions after upgrade (RedHat)
+          debug:
+            msg: "{{ rhel_versions_after.stdout_lines }}"
+      
+      when: ansible_os_family == "RedHat"
