@@ -34,7 +34,9 @@ new packages unintentionally.
 ## Configurable Variables
 The list of packages to be upgraded can be modified in the playbook:
 
-upgrade_packages:
+---
+
+### upgrade_packages:
 curl
 open-vm-tools
 python3
