@@ -25,7 +25,7 @@ new packages unintentionally.
 ## Playbook Details
 - Hosts: All (*)
 - Privilege Escalation: Enabled
-- Become Method: sudo
+- Become Method: sudo/dzdo
 - Become User: root
 - Error Handling: ignore_errors enabled to prevent failures
 
