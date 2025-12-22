@@ -93,6 +93,6 @@ ansible-playbook -i hosts upgrade_packages.yml --ask-pass --become --ask-become-
 ---
 
 👤 Author  
-**Sandeep Bandela**  
+**Sandeep Reddy Bandela**  
 Linux | Ansible | Automation
 ---
